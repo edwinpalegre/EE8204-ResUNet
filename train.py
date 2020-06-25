@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
+from tensorflow.keras.optimizers import Adam
 
 ## Seeding 
 seed = 2020
@@ -24,6 +24,7 @@ tf.seed = seed
 
 # HYPERPARAMETERS
 
+main_project = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/'
 train_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/training'
 test_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/testing'
 
@@ -68,16 +69,15 @@ epochs = 50
 
 # MODEL
 model = model_resunet.ResUNet((image_size, image_size, 3))
-adam = keras.optimizers.Adam()
+adam = Adam()
 model.compile(optimizer=adam, loss=utils.dice_coeff_loss, metrics=[utils.dice_coeff])
 model.summary()
 
 model.fit_generator(train_gen, validation_data=test_gen, steps_per_epoch=train_step, validation_steps=test_step, epochs=epochs)
-model.save_weights("ResUNet.h5")
 
 print("\n      Ground Truth            Predicted Value")
 
-for i in range(1, 5, 1):
+for i in range(1, testing_imgs + 1, 1):
     ## Dataset for prediction
     x, y = test_gen.__getitem__(i)
     result = model.predict(x)
@@ -92,3 +92,5 @@ for i in range(1, 5, 1):
 
         ax = fig.add_subplot(1, 2, 2)
         ax.imshow(np.reshape(result[i]*255, (image_size, image_size)), cmap="gray")
+        
+        

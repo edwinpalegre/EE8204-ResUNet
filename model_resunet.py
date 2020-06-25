@@ -40,6 +40,9 @@ tf.keras.layers.Conv2DTranspose(
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate
 from tensorflow.keras import Model, Input
 from contextlib import redirect_stdout
+import tensorflow as tf
+
+
 
 ### CONVOLUTIONAL BLOCK ###
 def conv_block(feature_map):
@@ -131,10 +134,8 @@ def ResUNet(inputshape):
     model_output = Conv2D(filters=1, kernel_size=(1, 1), strides=(1, 1), activation='sigmoid', padding='same')(model_decoder)
     
     return Model(model_input, model_output)
-
     
 model = ResUNet((224, 224, 3))
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-with open('modelsummary.txt', 'w') as f:
-    with redirect_stdout(f):
-        model.summary()
+model.summary()
+#tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='LR')
