@@ -113,7 +113,7 @@ def decoder(feature_map, from_encoder):
     return main_path
 
 ### RES-UNET ###
-def resunet_model(inputshape):
+def ResUNet(inputshape):
     
     # Input
     model_input = Input(shape=inputshape)
@@ -133,7 +133,7 @@ def resunet_model(inputshape):
     return Model(model_input, model_output)
 
     
-model = resunet_model((224, 224, 3))
+model = ResUNet((224, 224, 3))
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 with open('modelsummary.txt', 'w') as f:
     with redirect_stdout(f):
