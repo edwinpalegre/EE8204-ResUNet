@@ -73,3 +73,22 @@ model.compile(optimizer=adam, loss=utils.dice_coeff_loss, metrics=[utils.dice_co
 model.summary()
 
 model.fit_generator(train_gen, validation_data=test_gen, steps_per_epoch=train_step, validation_steps=test_step, epochs=epochs)
+model.save_weights("ResUNet.h5")
+
+print("\n      Ground Truth            Predicted Value")
+
+for i in range(1, 5, 1):
+    ## Dataset for prediction
+    x, y = test_gen.__getitem__(i)
+    result = model.predict(x)
+    result = result > 0.4
+    
+    for i in range(len(result)):
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=0.4, wspace=0.4)
+
+        ax = fig.add_subplot(1, 2, 1)
+        ax.imshow(np.reshape(y[i]*255, (image_size, image_size)), cmap="gray")
+
+        ax = fig.add_subplot(1, 2, 2)
+        ax.imshow(np.reshape(result[i]*255, (image_size, image_size)), cmap="gray")
