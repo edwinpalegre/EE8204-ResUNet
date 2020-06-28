@@ -37,7 +37,7 @@ tf.keras.layers.Conv2DTranspose(
 '''
 
 ### LIBRARIES ###
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate, Lambda
 from tensorflow.keras import Model, Input
 from contextlib import redirect_stdout
 import tensorflow as tf
@@ -120,9 +120,10 @@ def ResUNet(inputshape):
     
     # Input
     model_input = Input(shape=inputshape)
+    model_input_float = Lambda(lambda x: x / 255)(model_input)
     
     # Encoder Path
-    model_encoder = encoder(model_input)
+    model_encoder = encoder(model_input_float)
     
     # Bottleneck
     model_bottleneck = res_block(model_encoder[2], 512, [(2, 2), (1, 1)])
@@ -135,7 +136,7 @@ def ResUNet(inputshape):
     
     return Model(model_input, model_output)
     
-model = ResUNet((224, 224, 3))
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-model.summary()
+# model = ResUNet((224, 224, 3))
+# model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# model.summary()
 #tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='LR')

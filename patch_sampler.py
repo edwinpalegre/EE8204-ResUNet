@@ -5,12 +5,12 @@ Created on Thu Jun 25 02:30:54 2020
 @author: edwin.p.alegre
 """
 
-import os, sys
+import os
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
+from tqdm import tqdm
 
 ### PARAMETERS ###
 IMAGE_SIZE = 224
@@ -72,16 +72,32 @@ def get_randompatch():
     # ax.imshow(cropped_img)
     # ax = fig.add_subplot(1, 2, 2)
     # ax.imshow(cropped_mask, cmap='gray')
+    # print(mean_img_val)
 
     return cropped_img, cropped_mask, mean_img_val, id_name
 
-for new_id_name in range(1, 101):
+'''
+To get around the issue of some occluded images in the dataset which DO have corresponding masks that
+dont actually have the roads in the original image due to occlusion, we verify that the image patch is not 
+mainly occluded by taking the mean value of the image. To ensure that we don't fully eliminate images with
+a bright background naturally, the threshold is set particularily high. This will let SOME patches with occlusion
+pass through, but it should be offset by the amount of patches that actually are proper ground truths
+'''
+for new_id_name in tqdm(range(1, 30001)):
     threshold_value = 255
     while(threshold_value > 150):
         cropped_img, cropped_mask, threshold_value, id_name = get_randompatch()
     
-    cropped_img.save(os.path.join(sampled_image_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
-    cropped_mask.save(os.path.join(sampled_mask_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
-    print(new_id_name,'-', id_name, ' = ', threshold_value)
+    # cropped_img.save(os.path.join(sampled_image_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
+    # cropped_mask.save(os.path.join(sampled_mask_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
+    
+    cropped_img.save(os.path.join(sampled_image_path, str(new_id_name)) + '.png', 'PNG')
+    cropped_mask.save(os.path.join(sampled_mask_path, str(new_id_name)) + '.png', 'PNG')
+    
+    # if threshold_value > 100:
+    #     print(new_id_name,'-', id_name, ' = ', threshold_value, '*****')
+    # else:
+    #     print(new_id_name,'-', id_name, ' = ', threshold_value)
     new_id_name += 1    
 
+print('Done!')

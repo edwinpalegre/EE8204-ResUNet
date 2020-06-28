@@ -43,11 +43,13 @@ class DataGenerator(keras.utils.Sequence):
         
         # Read Image
         image = cv2.imread(image_path)
-        image = cv2.resize(image, (self.image_size, self.image_size))
+        if (image.shape[:-1] != (self.image_size, self.image_size)):
+            image = cv2.resize(image, (self.image_size, self.image_size))
         
         # Read Mask (as a greyscale)
         mask = cv2.imread(mask_path, 0)
-        mask = cv2.resize(mask, (self.image_size, self.image_size))
+        if (mask.shape != (self.image_size, self.image_size)):
+            mask = cv2.resize(mask, (self.image_size, self.image_size))
         mask = np.expand_dims(mask, axis=-1)
         
         # Normalize the image and mask

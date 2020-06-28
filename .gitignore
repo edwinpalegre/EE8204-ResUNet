@@ -1,1 +1,4 @@
 dataset/
+variables/
+__pycache__/
+models/
