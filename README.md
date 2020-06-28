@@ -21,7 +21,7 @@ First and foremost, the Res-UNet model needs to be generated. The program **mode
 
 The model structure can be verified in the modelsummary.txt, along with the model image for reference shown below.
 
-![ResUnet Model]
+![ResUnet Model](https://github.com/edwinpalegre/EE8204-ResUNet/blob/master/images/resunet.png)
 
 ### Sampled Training Dataset
 
