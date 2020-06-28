@@ -28,7 +28,7 @@ learning_rate = 0.001
 learning_rate_factor = 0.1
 epoch_factor = 20
 overlap = 14
-epochs = 50
+epochs = 100
 
 train_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/samples'
 test_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/samples_test'
@@ -97,11 +97,11 @@ callbacks =[
     checkpoint]
 
 ########## RESUME TRAINING ############
-latest_checkpoint = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/models/resunet.06-0.04.hdf5'
+latest_checkpoint = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/models/resunet.49-0.03.hdf5'
 
 model = tf.keras.models.load_model(latest_checkpoint)
 
-results = model.fit(X_train, Y_train, validation_split=0.1, batch_size=batch_size, epochs=epochs, initial_epoch=6, callbacks=callbacks)
+results = model.fit(X_train, Y_train, validation_split=0.1, batch_size=batch_size, epochs=epochs, initial_epoch=50, callbacks=callbacks)
 
 
 ########################################

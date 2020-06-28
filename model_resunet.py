@@ -139,4 +139,4 @@ def ResUNet(inputshape):
 # model = ResUNet((224, 224, 3))
 # model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # model.summary()
-#tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='LR')
+# tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='TB')
