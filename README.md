@@ -1,5 +1,6 @@
 # EE8204-ResUNet
 
+## Overview
 This is Implementation 1 for the course project for Ryerson Univerity's EE8204 - Neural Network course. This current version is the reimplemetnation of the Deep Residual U-Net used for Road Extraction by Zhang et al. (https://arxiv.org/abs/1711.10684). This project is mainly used to familiarize how Deep Neural Networks and their flow are designed and implemented in Tensorflow 2.
 
 ![Residual U-Net Model](https://github.com/edwinpalegre/EE8204-ResUNet/blob/master/images/model.PNG)
@@ -8,5 +9,17 @@ The dataset used will be Minh's Massachusetts roads dataset which can be found h
 
 There will be 3 main components in this repository:
 - model_resunet.py: This program defines and verifies the Deep Residual UNet. It verifies the model by providing a summary, letting the user check the size output at each layer to verify that everything makes sense
-- utils.py: This includes any functions that deal with image manipulation, the data generator, etc
+- patch_sampler.py: This program generates the required 224x224 samples from the original dataset. It's set to generate 30,000 samples, but can be adjusted as needed. I've also integrated a very simple filtering logic to avoid accidentally including samples generated from occluded images in the dataset.
 - train.py: This actually trains the ResUNet.
+
+This method utilizes the *Mean Squared Error* as its loss function. It's optimized using *Stochastic Gradient Descent* (SGD). The initial learning rate is set to 0.001 and is reduced by a factor of 0.1 after every 20 epochs. This can be implemented based off Tensorflow's learning rate schedule. The network is expected to converge after 50 epochs. Furthermore, the authors mention training this network using mini-batches of 8. Based off the fact that a Titan 1080 GPU was used in the original implementation (and since I am using a 2070 Super GPU), it makes sense to adopt the gradient accumulation methodology to train this network using the aforementioned mini-batch size. This has yet to be implemented.
+
+## Program Flow
+
+### The Deep Residual U-Net 
+
+### Sampled Training Dataset
+
+### Training Procedure
+
+## Results
