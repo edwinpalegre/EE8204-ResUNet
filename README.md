@@ -21,10 +21,14 @@ First and foremost, the Res-UNet model needs to be generated. The program **mode
 
 The model structure can be verified in the modelsummary.txt, along with the model image for reference shown below.
 
-![ResUnet Model]
+![ResUnet Model](https://github.com/edwinpalegre/EE8204-ResUNet/blob/master/images/resunet.png)
 
 ### Sampled Training Dataset
+The original paper states that from Mnih's dataset, a sampled training dataset of 30,000 images were to be generated. There are occlusions in approximately 100 of these images. This poses as issue since their corresponding masks classify areas under these occlusions as having roads. Thus, it is in our interest to minimize the amount of occluded samples in our training dataset. To accomodate this, a simple filtering operation was created. After the 224x224 image patch sample is created, the mean of all the pixels in the image is taken. The reasoning is that these areas are primarily dark, thus their mean should be fairly low. The occlusions are large noticeable patches of white pixels, bringing up the mean by a considerable amount. After some testing, it was found that there were some original images that were representative of different regions that had brigetr pixels (i.e fields of yellow wheat). After some testing, a threshold of 150 was chosen. While it will not fully eliminate these occluded images, it will minimize the probability that a majorly occluded image will be included in the dataset. It also ensures that actual images that are naturally bright do not get fully filtered out.
 
 ### Training Procedure
+As stated previously, 30,000 224x224 RGB sampled images were used for training. Thus, the model takes a 224x224x3 input image and returns a binary segmented map of the same size. The network utilizes the mean squared error as its loss function and optimizes it using the stochastic gradient decent algorithm. It was trained with a learning rate of 0.001 and reduced by a factor of 0.1 after each 20 epochs. Convergence is expected to occcur after 50 epochs. 
+
+A major component of training is the involvement of mini-batches and gradient accumulation. This has yet to be implemented, but it is expected to drastically assist with training our network. The images are fed into the network as a single variable, where the RGB images are a [30000x224x224x3] array, and its correspnsding mask is treated the same albeit with a single channel instead of 3. These are passed into the model.fit() method for training. Callbacks used include the ModelCheckpoint(), which saves the best model based off the validation loss, EarlyStopping(), which monitors the validation loss with a patience of 2, and TensorBoard(), which provides a visualization of how training is progressing. 
 
 ## Results
