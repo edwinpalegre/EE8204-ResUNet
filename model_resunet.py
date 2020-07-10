@@ -37,7 +37,7 @@ tf.keras.layers.Conv2DTranspose(
 '''
 
 ### LIBRARIES ###
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate, Lambda
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate, Lambda, UpSampling2D
 from tensorflow.keras import Model, Input
 from contextlib import redirect_stdout
 import tensorflow as tf
@@ -69,6 +69,7 @@ def res_block(feature_map, conv_filter, stride):
     relu_2 = Activation(activation='relu')(bn_2)
     conv_2 = Conv2D(conv_filter, kernel_size=(3,3), strides=stride[1], padding='same')(relu_2)
     
+
     res_conn = Conv2D(conv_filter, kernel_size=(1,1), strides=stride[0], padding='same')(feature_map)
     res_conn = BatchNormalization()(res_conn)
     addition = Add()([res_conn, conv_2])
@@ -99,17 +100,20 @@ def encoder(feature_map):
 def decoder(feature_map, from_encoder):
     
     # Block 1: Up-sample, Concatenation + Residual Block 1
-    main_path = Conv2DTranspose(filters=256, kernel_size=(2,2), strides=(2,2), padding='same')(feature_map)
+    main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(feature_map)
+    # main_path = Conv2DTranspose(filters=256, kernel_size=(2,2), strides=(2,2), padding='same')(feature_map)
     main_path = concatenate([main_path, from_encoder[2]], axis=3)
     main_path = res_block(main_path, 256, [(1, 1), (1, 1)])
     
     # Block 2: Up-sample, Concatenation + Residual Block 2
-    main_path = Conv2DTranspose(filters=128, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
+    main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
+    # main_path = Conv2DTranspose(filters=128, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
     main_path = concatenate([main_path, from_encoder[1]], axis=3)
     main_path = res_block(main_path, 128, [(1, 1), (1, 1)])
     
     # Block 3: Up-sample, Concatenation + Residual Block 3
-    main_path = Conv2DTranspose(filters=64, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
+    main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
+    # main_path = Conv2DTranspose(filters=64, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
     main_path = concatenate([main_path, from_encoder[0]], axis=3)
     main_path = res_block(main_path, 64, [(1, 1), (1, 1)])
     

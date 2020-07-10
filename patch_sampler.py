@@ -6,6 +6,11 @@ Created on Thu Jun 25 02:30:54 2020
 """
 
 import os
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,12 +23,12 @@ OVERLAP = 14
 NUM_OF_PATCHES = 10
 
 ### PATHS ###
-sample_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/samples'
-train_dataset = r'C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/training'
+sample_dataset = r'dataset/samples'
+train_dataset = r'dataset/training'
 
 # VERIFY IF SAMPLE FOLDER EXISTS
 if os.path.isdir(sample_dataset) == False:
-    os.chdir('C:/Users/edwin.p.alegre/Google Drive/Synced Folders/Academics/Ryerson University - MASc/Courses/EE8204 - Neural Networks/Course Project/project_build_resunet/dataset/')
+    os.chdir('dataset/')
     os.mkdir('samples')
     os.mkdir('samples/image')
     os.mkdir('samples/mask')
@@ -88,16 +93,26 @@ for new_id_name in tqdm(range(1, 30001)):
     while(threshold_value > 150):
         cropped_img, cropped_mask, threshold_value, id_name = get_randompatch()
     
+    '''
+    This part of the program is only used to help verify which image patch you are looking at relative to the original 
+    image it was sampled from. It will set the name to contain the ID of the original image that it was sampeld from 
+    so the user can correlate the two for inspection, if needed
+    '''
     # cropped_img.save(os.path.join(sampled_image_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
     # cropped_mask.save(os.path.join(sampled_mask_path, str(new_id_name) + '-' + str(id_name)) + '.png', 'PNG')
     
     cropped_img.save(os.path.join(sampled_image_path, str(new_id_name)) + '.png', 'PNG')
     cropped_mask.save(os.path.join(sampled_mask_path, str(new_id_name)) + '.png', 'PNG')
     
+    '''
+    This part of the program is to help determine the samples that have a particularily high mean value. This way, the user
+    can inspect the sample to see if the image has a high mean value due to occlusion or if it's naturally occuring
+    '''
     # if threshold_value > 100:
     #     print(new_id_name,'-', id_name, ' = ', threshold_value, '*****')
     # else:
     #     print(new_id_name,'-', id_name, ' = ', threshold_value)
+    
     new_id_name += 1    
 
 print('Done!')

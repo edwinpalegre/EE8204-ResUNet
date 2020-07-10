@@ -2,3 +2,7 @@ dataset/
 variables/
 __pycache__/
 models/
+logs/
+results/
+train_gradaccum.py
+checkpoint.py
