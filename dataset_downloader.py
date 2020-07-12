@@ -39,10 +39,10 @@ def html_url_parser(url, save_dir, show=False, wait=False):
         img_url = link['href']
 
         try:
-            if os.path.isfile(save_dir + "img-%d.png" % image_id) == False:
+            if os.path.isfile(save_dir + "%d.png" % image_id) == False:
                 print("[INFO] Downloading image from URL:", link['href'])
                 image = Image.open(urlopen(img_url))
-                image.save(save_dir + "img-%d.png" % image_id, "PNG")
+                image.save(save_dir + "%d.png" % image_id, "PNG")
                 if(show):
                     image.show()
             else:
@@ -68,12 +68,17 @@ if __name__ == "__main__":
 
     URL_TEST_IMG = "https://www.cs.toronto.edu/~vmnih/data/mass_roads/valid/sat/index.html"
     URL_TEST_GT = "https://www.cs.toronto.edu/~vmnih/data/mass_roads/valid/map/index.html"
-
     
-    html_url_parser(url=URL_TRAIN_IMG, save_dir="./training/input/")
-    html_url_parser(url=URL_TRAIN_GT, save_dir="./training/output/")
+    URL_VAL_IMG = "https://www.cs.toronto.edu/~vmnih/data/mass_roads/valid/sat/index.html"
+    URL_VAL_GT = "https://www.cs.toronto.edu/~vmnih/data/mass_roads/valid/map/index.html"
+    
+    html_url_parser(url=URL_TRAIN_IMG, save_dir="./training/image/")
+    html_url_parser(url=URL_TRAIN_GT, save_dir="./training/mask/")
 
-    html_url_parser(url=URL_TEST_IMG, save_dir="./testing/input/")
-    html_url_parser(url=URL_TEST_GT, save_dir="./testing/output/")
+    html_url_parser(url=URL_TEST_IMG, save_dir="./testing/image/")
+    html_url_parser(url=URL_TEST_GT, save_dir="./testing/mask/")
+    
+    html_url_parser(url=URL_VAL_IMG, save_dir="./validation/image/")
+    html_url_parser(url=URL_VAL_GT, save_dir="./validation/mask/")
 
     print("[INFO] All done!")

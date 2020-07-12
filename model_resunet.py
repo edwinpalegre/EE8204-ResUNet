@@ -4,47 +4,17 @@ Created on Thu Jun 18 00:14:37 2020
 
 @author: edwin.p.alegre
 """
-##### LAYERS #####
-'''
------ 2D Convolution -----
-tf.keras.layers.Conv2D(filters, kernel_size, strides=(1, 1), padding='valid', data_format=None,
-    dilation_rate=(1, 1), activation=None, use_bias=True,
-    kernel_initializer='glorot_uniform', bias_initializer='zeros',
-    kernel_regularizer=None, bias_regularizer=None, activity_regularizer=None,
-    kernel_constraint=None, bias_constraint=None, **kwargs
-)
 
+################################## LIBRARIES ##################################
 
------ Batch Normalization -----
-tf.keras.layers.BatchNormalization(
-    axis=-1, momentum=0.99, epsilon=0.001, center=True, scale=True,
-    beta_initializer='zeros', gamma_initializer='ones',
-    moving_mean_initializer='zeros', moving_variance_initializer='ones',
-    beta_regularizer=None, gamma_regularizer=None, beta_constraint=None,
-    gamma_constraint=None, renorm=False, renorm_clipping=None, renorm_momentum=0.99,
-    fused=None, trainable=True, virtual_batch_size=None, adjustment=None, name=None,
-    **kwargs
-)
-
----- 2D Transposed Convolution -----
-tf.keras.layers.Conv2DTranspose(
-    filters, kernel_size, strides=(1, 1), padding='valid', output_padding=None,
-    data_format=None, dilation_rate=(1, 1), activation=None, use_bias=True,
-    kernel_initializer='glorot_uniform', bias_initializer='zeros',
-    kernel_regularizer=None, bias_regularizer=None, activity_regularizer=None,
-    kernel_constraint=None, bias_constraint=None, **kwargs
-)
-'''
-
-### LIBRARIES ###
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Add, Conv2DTranspose, concatenate, Lambda, UpSampling2D
 from tensorflow.keras import Model, Input
 from contextlib import redirect_stdout
 import tensorflow as tf
 
 
+############################# CONVOLUTIONAL BLOCK #############################
 
-### CONVOLUTIONAL BLOCK ###
 def conv_block(feature_map):
     
     # Main Path
@@ -59,7 +29,8 @@ def conv_block(feature_map):
     
     return addition
 
-### RESIDUAL BLOCK ###
+############################### RESIDUAL BLOCK ################################
+
 def res_block(feature_map, conv_filter, stride):
     
     bn_1 = BatchNormalization()(feature_map)
@@ -76,7 +47,8 @@ def res_block(feature_map, conv_filter, stride):
     
     return addition
 
-### ENCODER ###
+################################### ENCODER ###################################
+
 def encoder(feature_map):
     
     # Initialize the to_decoder connection
@@ -96,7 +68,8 @@ def encoder(feature_map):
     
     return to_decoder
 
-### DECODER ###
+################################### DECODER ###################################
+
 def decoder(feature_map, from_encoder):
     
     # Block 1: Up-sample, Concatenation + Residual Block 1
@@ -119,7 +92,8 @@ def decoder(feature_map, from_encoder):
     
     return main_path
 
-### RES-UNET ###
+################################ RESIDUAL UNET ################################
+
 def ResUNet(inputshape):
     
     # Input
@@ -139,6 +113,12 @@ def ResUNet(inputshape):
     model_output = Conv2D(filters=1, kernel_size=(1, 1), strides=(1, 1), activation='sigmoid', padding='same')(model_decoder)
     
     return Model(model_input, model_output)
+
+################################ SANITY CHECK #################################
+
+# The last couple of lines are only used for a sanity check. It outputs a summary of the layers to verify
+# if each layer is outputting the correct dimension as expected. The final line outputs a graphic of 
+# the actual network for a visual reference
     
 # model = ResUNet((224, 224, 3))
 # model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
