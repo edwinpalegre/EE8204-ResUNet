@@ -79,3 +79,10 @@ Since my original approach didn't work too well, I decided to pivot. Instead of 
 There are still issues to be fixed. First of all, a second glance should be given at the original method as it should be reproducable. I'm unsure as to why I haven't achieved the same results as the authors did. The results also suffer from the traditional road extraction issues. Mainly, the fact that the network cannot classify roads with occlusions such as trees or shadows. There also seems to be an issue with classifying parking lots and spaces. This could be partially attributed to the dataset as some of the images classify commercial and residential parking spaces as roads while other images do not. There is alos noise that is produced, although this may be alleviated through post processing techniques such as erosion & dilation. however, current efforts have not provided the best results when this was attempted.
 
 Future work may include the use of conditional random fields (CRFs) for post processing. Furthermore, to help alleviate the occlusions, multispecral satellite images may be useable as these types of images do contain information past the visible spectrum. There are also different architectures that should be implemented like the GL-Dense-UNet, which boasts more robust results than this paper. 
+
+### Model Predicitions
+Ground Truth
+![Ground Truth](https://github.com/edwinpalegre/EE8204-ResUNet/blob/master/images/groundtruths/7.png)
+
+Predicted Mask
+![Mask](https://github.com/edwinpalegre/EE8204-ResUNet/blob/master/images/finalresults/7.png)
