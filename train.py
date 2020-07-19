@@ -85,7 +85,7 @@ model.fit(X_train, Y_train, validation_split=0.1, batch_size=BATCH, epochs=EPOCH
 # allow for training continuation in the event that the training was interuppted for whatever reason. If this is the 
 # case, please comment out line 78 as well
 
-# latest_checkpoint = r'models/resunet.13-0.91.hdf5'
+# latest_checkpoint = r'models/resunet.16-0.93.hdf5'
 # model = tf.keras.models.load_model(latest_checkpoint)
 # model.fit(X_train, Y_train, validation_split=0.1, batch_size=BATCH, epochs=EPOCHS, callbacks=callbacks, initial_epoch=8)
 
