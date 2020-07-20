@@ -18,16 +18,16 @@ from PIL import Image
 from tqdm import tqdm
 
 ### PARAMETERS ###
-IMG_SIZE = 224
-OVERLAP = 14
+IMG_SIZE = 512
+OVERLAP = 24
 
 test_dataset = r'dataset/testing'
-test_patch_dataset = r'dataset/test_patch'
+test_patch_dataset = r'dataset/samples_test_512'
 
 
 if os.path.isdir(test_patch_dataset) == False:
     os.chdir('dataset/')
-    os.mkdir('test_patch')
+    os.mkdir('samples_test_512')
 
     
 # IMAGE FILE PARAMETERS
@@ -60,16 +60,16 @@ for id_name in tqdm(range(1, len(test_ids) + 1)):
     x2 = IMG_SIZE
     y2 = IMG_SIZE
     
-    if os.path.isdir(r'dataset/test_patch/' + str(id_name)) == False:
-            os.mkdir('dataset/test_patch/' + str(id_name))
-            os.mkdir('dataset/test_patch/' + str(id_name) + '/image')
-            os.mkdir('dataset/test_patch/' + str(id_name) + '/mask')
+    if os.path.isdir(r'dataset/samples_test_512/' + str(id_name)) == False:
+            os.mkdir('dataset/samples_test_512/' + str(id_name))
+            os.mkdir('dataset/samples_test_512/' + str(id_name) + '/image')
+            os.mkdir('dataset/samples_test_512/' + str(id_name) + '/mask')
     
     while y2 < image_shape[0]:
         while x2 < image_shape[0]:
             
-            test_image_path = os.path.join('dataset/test_patch/', str(id_name), 'image').replace('\\','/')
-            test_mask_path = os.path.join('dataset/test_patch/', str(id_name), 'mask').replace('\\','/')
+            test_image_path = os.path.join('dataset/samples_test_512/', str(id_name), 'image').replace('\\','/')
+            test_mask_path = os.path.join('dataset/samples_test_512/', str(id_name), 'mask').replace('\\','/')
             
             # Crop the actual sampled image and mask from the original, save with new id name
             cropped_img = img.crop((x1, y1, x2, y2))

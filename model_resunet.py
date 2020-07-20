@@ -18,12 +18,12 @@ import tensorflow as tf
 def conv_block(feature_map):
     
     # Main Path
-    conv_1 = Conv2D(filters=64, kernel_size=(3,3), strides=(1,1), padding='same')(feature_map)
+    conv_1 = Conv2D(filters=32, kernel_size=(3,3), strides=(1,1), padding='same')(feature_map)
     bn = BatchNormalization()(conv_1)
     relu = Activation(activation='relu')(bn)
-    conv_2 = Conv2D(filters=64, kernel_size=(3,3), strides=(1,1), padding='same')(relu)
+    conv_2 = Conv2D(filters=32, kernel_size=(3,3), strides=(1,1), padding='same')(relu)
     
-    res_conn = Conv2D(filters=64, kernel_size=(1,1), strides=(1,1), padding='same')(feature_map)
+    res_conn = Conv2D(filters=32, kernel_size=(1,1), strides=(1,1), padding='same')(feature_map)
     res_conn = BatchNormalization()(res_conn)
     addition = Add()([res_conn, conv_2])
     
@@ -51,19 +51,27 @@ def res_block(feature_map, conv_filter, stride):
 
 def encoder(feature_map):
     
-    # Initialize the to_decoder connection
+    # Initialize the to_decoder connection - (512, 512, 3)
     to_decoder = []
     
-    # Block 1 - Convolution Block
+    # Block 1 - Convolution Block - (512, 512, 32)
     path = conv_block(feature_map)
     to_decoder.append(path)
     
-    # Block 2 - Residual Block 1
+    # Block 2 - Residual Block 1 - (256, 256, 64)
+    path = res_block(path, 64, [(2, 2), (1, 1)])
+    to_decoder.append(path)
+    
+    # Block 3 - Residual Block 2 - (128, 128, 128)
     path = res_block(path, 128, [(2, 2), (1, 1)])
     to_decoder.append(path)
     
-    # Block 3 - Residual Block 2
+    # Block 4 - Residual Block 3 - (64, 64, 256) 
     path = res_block(path, 256, [(2, 2), (1, 1)])
+    to_decoder.append(path)
+    
+    # Block 5 - Residual Block 4 - (32, 32, 512) 
+    path = res_block(path, 512, [(2, 2), (1, 1)])
     to_decoder.append(path)
     
     return to_decoder
@@ -72,23 +80,30 @@ def encoder(feature_map):
 
 def decoder(feature_map, from_encoder):
     
-    # Block 1: Up-sample, Concatenation + Residual Block 1
+    # Block 1: Up-sample, Concatenation + Residual Block 1 - (32, 32, 512)
     main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(feature_map)
-    # main_path = Conv2DTranspose(filters=256, kernel_size=(2,2), strides=(2,2), padding='same')(feature_map)
-    main_path = concatenate([main_path, from_encoder[2]], axis=3)
+    main_path = concatenate([main_path, from_encoder[4]], axis=3)
+    main_path = res_block(main_path, 512, [(1, 1), (1, 1)])
+    
+    # Block 2: Up-sample, Concatenation + Residual Block 2 - (64, 64, 256)
+    main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
+    main_path = concatenate([main_path, from_encoder[3]], axis=3)
     main_path = res_block(main_path, 256, [(1, 1), (1, 1)])
     
-    # Block 2: Up-sample, Concatenation + Residual Block 2
+    # Block 3: Up-sample, Concatenation + Residual Block 3 - (128, 128, 128)
     main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
-    # main_path = Conv2DTranspose(filters=128, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
-    main_path = concatenate([main_path, from_encoder[1]], axis=3)
+    main_path = concatenate([main_path, from_encoder[2]], axis=3)
     main_path = res_block(main_path, 128, [(1, 1), (1, 1)])
     
-    # Block 3: Up-sample, Concatenation + Residual Block 3
+    # Block 4: Up-sample, Concatenation + Residual Block 4 - (256, 256, 64)
     main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
-    # main_path = Conv2DTranspose(filters=64, kernel_size=(2,2), strides=(2,2), padding='same')(main_path)
-    main_path = concatenate([main_path, from_encoder[0]], axis=3)
+    main_path = concatenate([main_path, from_encoder[1]], axis=3)
     main_path = res_block(main_path, 64, [(1, 1), (1, 1)])
+    
+    # Block 5: Up-sample, Concatenation + Residual Block 5 - (512, 512, 32)
+    main_path = UpSampling2D(size=(2,2), interpolation='bilinear')(main_path)
+    main_path = concatenate([main_path, from_encoder[0]], axis=3)
+    main_path = res_block(main_path, 32, [(1, 1), (1, 1)])
     
     return main_path
 
@@ -104,7 +119,7 @@ def ResUNet(inputshape):
     model_encoder = encoder(model_input_float)
     
     # Bottleneck
-    model_bottleneck = res_block(model_encoder[2], 512, [(2, 2), (1, 1)])
+    model_bottleneck = res_block(model_encoder[4], 1024, [(2, 2), (1, 1)])
     
     # Decoder Path
     model_decoder = decoder(model_bottleneck, model_encoder)
@@ -120,7 +135,7 @@ def ResUNet(inputshape):
 # if each layer is outputting the correct dimension as expected. The final line outputs a graphic of 
 # the actual network for a visual reference
     
-# model = ResUNet((224, 224, 3))
+# model = ResUNet((512, 512, 3))
 # model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # model.summary()
 # tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='TB')

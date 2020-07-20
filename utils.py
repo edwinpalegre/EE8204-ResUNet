@@ -11,8 +11,8 @@ from skimage.io import imread
 from tqdm import tqdm
 
 OGIMG_SIZE = 1500
-IMG_SIZE = 224
-OVERLAP = 14
+IMG_SIZE = 512
+OVERLAP = 24
 
 def imgstitch(img_path):
     """
@@ -35,7 +35,8 @@ def imgstitch(img_path):
     _, _, img_files = next(os.walk(img_path))
     
     img_files = sorted(img_files,key=lambda x: int(os.path.splitext(x)[0]))
-    IMG_WIDTH, IMG_HEIGHT = (Image.open(img_path + '/11.png')).size
+    # IMG_WIDTH, IMG_HEIGHT = (Image.open(img_path + '/11.png')).size
+    IMG_WIDTH, IMG_HEIGHT = IMG_SIZE, IMG_SIZE
     
     img = np.zeros((len(img_files), IMG_WIDTH, IMG_HEIGHT), dtype=np.uint8)
     full_img = Image.new('RGB', (1470, 1470))
@@ -101,23 +102,28 @@ def DatasetLoad(train_dataset, test_dataset, val_dataset):
         
         Y_train[n] = mask
     
-    ### VALIDATION DATASET ###
-    _, _, val_files = next(os.walk(os.path.join(val_dataset, 'image')))
-    val_imgs = len(val_files)
-    val_ids = list(range(1, val_imgs + 1))
-    
-    X_val = np.zeros((len(val_ids), IMG_SIZE, IMG_SIZE, 3), dtype=np.uint8)
-    Y_val = np.zeros((len(val_ids), IMG_SIZE, IMG_SIZE, 1), dtype=np.bool)
-    
-    for n, id_ in tqdm(enumerate(val_ids), total=len(val_ids)):
-        X_val[n] = imread(val_dataset + '/image/' + str(id_) + '.png')
-        mask = np.zeros((IMG_SIZE, IMG_SIZE, 1), dtype=np.bool)
-        for mask_file in next(os.walk(val_dataset  + '/mask/')):
-            mask_ = imread(val_dataset + '/mask/' + str(id_) + '.png')
-            mask_ = np.expand_dims(mask_, axis=-1)
-            mask = np.maximum(mask, mask_)
+    if isinstance(val_dataset, str) == True:
+        ### VALIDATION DATASET ###
+        _, _, val_files = next(os.walk(os.path.join(val_dataset, 'image')))
+        val_imgs = len(val_files)
+        val_ids = list(range(1, val_imgs + 1))
         
-        Y_val[n] = mask
+        X_val = np.zeros((len(val_ids), IMG_SIZE, IMG_SIZE, 3), dtype=np.uint8)
+        Y_val = np.zeros((len(val_ids), IMG_SIZE, IMG_SIZE, 1), dtype=np.bool)
+        
+        for n, id_ in tqdm(enumerate(val_ids), total=len(val_ids)):
+            X_val[n] = imread(val_dataset + '/image/' + str(id_) + '.png')
+            mask = np.zeros((IMG_SIZE, IMG_SIZE, 1), dtype=np.bool)
+            for mask_file in next(os.walk(val_dataset  + '/mask/')):
+                mask_ = imread(val_dataset + '/mask/' + str(id_) + '.png')
+                mask_ = np.expand_dims(mask_, axis=-1)
+                mask = np.maximum(mask, mask_)
+            
+            Y_val[n] = mask
+            
+    else:
+        X_val = None; Y_val = None
+                
         
     ### TESTING DATASET ###
     _, test_fol, _ = next(os.walk(test_dataset))

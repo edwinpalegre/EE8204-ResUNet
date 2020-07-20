@@ -19,23 +19,23 @@ from tqdm import tqdm
 
 ################################## PARAMETERS #################################
 
-IMAGE_SIZE = 224
+IMAGE_SIZE = 512
 OVERLAP = 14
 NUM_OF_PATCHES = 10
-NUM_OF_SAMPLES = 30000
+NUM_OF_SAMPLES = 10000
 
 #################################### PATHS ####################################
 
 # Just change these paths to get different samples for training and validation datasets
-sample_dataset = r'dataset/samples_train'
+sample_dataset = r'dataset/samples_train_512'
 train_dataset = r'dataset/training'
 
 # Verify if sample folder exists. 
 if os.path.isdir(sample_dataset) == False:
     os.chdir('dataset/')
-    os.mkdir('samples_train')
-    os.mkdir('samples_train/image')
-    os.mkdir('samples_train/mask')
+    os.mkdir('samples_train_512')
+    os.mkdir('samples_train_512/image')
+    os.mkdir('samples_train_512/mask')
     sampled_image_path = os.path.join(sample_dataset, 'image').replace('\\','/')
     sampled_mask_path = os.path.join(sample_dataset, 'mask').replace('\\','/')
 else:

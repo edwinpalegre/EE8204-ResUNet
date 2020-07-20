@@ -36,16 +36,16 @@ def schedlr(epoch, lr):
 
 ############################### HYPERPARAMETERS ###############################
 
-IMG_SIZE = 224
-BATCH = 8
-EPOCHS = 100
+IMG_SIZE = 512
+BATCH = 3
+EPOCHS = 50
 
 ################################### DATASET ###################################
 
 # Paths for relevant datasets to load in
-train_dataset = r'dataset/samples_train'
-test_dataset = r'dataset/samples_test'
-val_dataset = r'dataset/samples_val'
+train_dataset = r'dataset/samples_train_512'
+test_dataset = r'dataset/samples_test_512'
+val_dataset = 0
 
 # Make a list of the test folders to be used when predicting the model. This will be fed into the prediction
 # flow to generate the stitched image based off the predictions of the patches fed into the network
@@ -53,6 +53,9 @@ _, test_fol, _ = next(os.walk(test_dataset))
 
 # Load in the relevant datasets 
 X_train, Y_train, X_test, Y_test, X_val, Y_val = DatasetLoad(train_dataset, test_dataset, val_dataset)
+
+X_train = X_train[0:3000]
+Y_train = Y_train[0:3000]
         
 ################################ RESIDUAL UNET ################################
 
@@ -69,11 +72,11 @@ model.compile(optimizer=sgd_optimizer, loss='binary_crossentropy', metrics=['acc
 model.summary()
 
 # Callacks to be used in the network. Checkpoint can be adjusted to save the best (lowest loss) if desired. 
-checkpoint_path = os.path.join(dname, 'models', 'resunet.{epoch:02d}-{f1:.2f}.hdf5')
-checkpoint = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=False)
+checkpoint_path = os.path.join(dname, 'models', 'resunet_512.{epoch:02d}-{f1:.2f}.hdf5')
+checkpoint = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=True)
 
 callbacks =[
-    tf.keras.callbacks.EarlyStopping(patience=5, monitor='val_loss'),
+    # tf.keras.callbacks.EarlyStopping(patience=5, monitor='val_loss'),
     tf.keras.callbacks.TensorBoard(log_dir='logs'),
     LearningRateScheduler(schedlr, verbose=1),
     checkpoint]
