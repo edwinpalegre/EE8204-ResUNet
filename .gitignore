@@ -4,5 +4,6 @@ __pycache__/
 models/
 logs/
 results/
+previous_models/
 train_gradaccum.py
 checkpoint.py
