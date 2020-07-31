@@ -21,14 +21,14 @@ This method utilizes the *Mean Squared Error* as its loss function. It's optimiz
 
 ### Specs and Dependencies
 - Tensorflow 2.2.0 
-- Python 3.7
-  - numpy
-  - tqdm (Optional, really useful to just see how long it will take to download and load the datasets as it does take a while)
-  - scikit-image
-  - matplotlib (Optional, used mainly for debugging and displaying images. Results and samples are already saved anyways so this was only used in debugging stage)
-  - Pillow
-  - bs4
-  - pydotplus & graphviz (Optional, used for tf.keras.plot_model(). A visual model can be seen when using Tensorboard so this really is super optional. If you do decide to 
+- Python 3.8.3
+  - numpy=1.18.5
+  - tqdm=4.46.1 (Optional, really useful to just see how long it will take to download and load the datasets as it does take a while)
+  - scikit-image=0.17.2
+  - matplotlib=3.2.1 (Optional, used mainly for debugging and displaying images. Results and samples are already saved anyways so this was only used in debugging stage)
+  - Pillow=7.1.2
+  - bs4=0.0.1
+  - pydotplus=2.0.2 & graphviz=0.14 (Optional, used for tf.keras.plot_model(). A visual model can be seen when using Tensorboard so this really is super optional. If you do decide to 
   download these utilites, make sure that you also run the MSI installer for graphviz to get the executables. Following this, find the graphviz bin folder and add that to your 
   PATH in your system variables afterwards)
 - CUDA (Optional, only install if using local machine with a CUDA capable GPU)
