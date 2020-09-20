@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Aug  3 14:57:40 2020
-
+Created on Wed Jul  8 15:42:46 2020
 @author: edwin.p.alegre
 """
-
-from glob import glob
 
 import os
 
@@ -16,17 +13,6 @@ os.chdir(dname)
 import model_resunet
 import numpy as np
 import tensorflow as tf
-
-# gpus = tf.config.experimental.list_physical_devices('GPU')
-# if gpus:
-#     try:
-#         for gpu in gpus:
-#             tf.config.experimental.set_memory_growth(gpu, True)
-#         logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-#         print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-#     except RuntimeError as e:
-#         print(e)
-        
 from math import floor
 from tqdm import tqdm
 from skimage.io import imread
@@ -34,15 +20,12 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow_addons.metrics import F1Score
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.data import Dataset
 import random
 import scipy.misc
 from PIL import Image
 import shutil
-from utils import imgstitch, DatasetLoad, DatasetLoader
+from utils import imgstitch, DatasetLoad
 
-#%%
 ########################### LEARNING RATE SCHEDULER ###########################
 
 # Function for learning rate decay. The learning rate will reduce by a factor of 0.1 every 10 epochs.
@@ -50,52 +33,30 @@ def schedlr(epoch, lr):
     new_lr = 0.001 * (0.1)**(floor(epoch/10))
     return new_lr
 
-#%%
 ############################### HYPERPARAMETERS ###############################
 
-IMG_SIZE = 224
-BATCH = 8
+IMG_SIZE = 512
+BATCH = 3
 EPOCHS = 50
-SPLIT = 0.2
-AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-#%%
 ################################### DATASET ###################################
 
 # Paths for relevant datasets to load in
-# train_dataset = r'dataset/samples_train'
-# train_dataset_image = 'dataset/samples_train_512/image/image/'
-# train_dataset_mask = r'dataset/samples_train_512/mask/mask/'
-# val_dataset = r'dataset/samples_val_512'
-# test_dataset = r'dataset/samples_test_512'
+train_dataset = r'dataset/samples_train_512'
+test_dataset = r'dataset/samples_test_512'
+val_dataset = 0
 
-train_dataset = r'dataset/samples_train'
-test_dataset = r'dataset/samples_test'
-val_dataset = r'dataset/samples_val'
-
+# Make a list of the test folders to be used when predicting the model. This will be fed into the prediction
+# flow to generate the stitched image based off the predictions of the patches fed into the network
 _, test_fol, _ = next(os.walk(test_dataset))
 
+# Load in the relevant datasets 
 X_train, Y_train, X_test, Y_test, X_val, Y_val = DatasetLoad(train_dataset, test_dataset, val_dataset)
 
-# img_dataset = Dataset.from_tensor_slices()
-# mask_dataset = Dataset.list_files(str(train_dataset_mask + '*.png'), shuffle=False)  
-
-# dataset = Dataset.zip((img_dataset, mask_dataset))
-
-# for f in dataset.take(5):
-#     print(f.numpy())
-
-# image_paths = [os.path.join(train_dataset_image, x) for x in os.listdir(train_dataset_image) if x.endswith('.png')]
-# mask_paths = [os.path.join(train_dataset_mask, x) for x in os.listdir(train_dataset_mask) if x.endswith('.png')]
-
-# dataset = DatasetLoader(image_path=image_paths,
-#                         mask_path=mask_paths,
-#                         image_size=(IMG_SIZE, IMG_SIZE))
-
-# dataset = dataset.data_batch(batch_size=BATCH, shuffle=False)
-
-#%%
-#################################### MODEL ####################################
+X_train = X_train[0:3000]
+Y_train = Y_train[0:3000]
+        
+################################ RESIDUAL UNET ################################
 
 sgd_optimizer = Adam()
 
@@ -110,17 +71,17 @@ model.compile(optimizer=sgd_optimizer, loss='binary_crossentropy', metrics=['acc
 model.summary()
 
 # Callacks to be used in the network. Checkpoint can be adjusted to save the best (lowest loss) if desired. 
-checkpoint_path = os.path.join(dname, 'models', 'resunet_.{epoch:02d}-{f1:.2f}.hdf5')
+checkpoint_path = os.path.join(dname, 'models', 'resunet_512.{epoch:02d}-{f1:.2f}.hdf5')
 checkpoint = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, verbose=1, save_best_only=True)
 
 callbacks =[
     # tf.keras.callbacks.EarlyStopping(patience=5, monitor='val_loss'),
-    # tf.keras.callbacks.TensorBoard(log_dir='logs'),
+    tf.keras.callbacks.TensorBoard(log_dir='logs'),
     LearningRateScheduler(schedlr, verbose=1),
     checkpoint]
 
 # Fit the network to the training dataset. The validation dataset can be used instead of a validataion split
-model.fit(X_train, Y_train, validation_split=0.2, batch_size=BATCH, epochs=EPOCHS, callbacks=callbacks)
+model.fit(X_train, Y_train, validation_split=0.1, batch_size=BATCH, epochs=EPOCHS, callbacks=callbacks)
 
 # Uncomment lines 84-85 and comment line 78 to run a previous model for prediction. Uncommenting lines 84-86 will 
 # allow for training continuation in the event that the training was interuppted for whatever reason. If this is the 

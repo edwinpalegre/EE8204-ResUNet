@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Jun 20 02:44:43 2020
-
 @author: edwin.p.alegre
 """
 from PIL import Image
@@ -9,10 +8,15 @@ import os
 import numpy as np
 from skimage.io import imread
 from tqdm import tqdm
+import tensorflow as tf
+from tensorflow.data import Dataset
+from typing import List, Tuple
+import random
 
 OGIMG_SIZE = 1500
-IMG_SIZE = 512
-OVERLAP = 24
+IMG_SIZE = 224
+OVERLAP = 14
+AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 def imgstitch(img_path):
     """
@@ -25,18 +29,16 @@ def imgstitch(img_path):
     ----------
     img_path : STRING
         Path to directory with test image patches
-
     Returns
     -------
     None. The final stitched image will be automatically saved in the same directory as the image patches with the 
     name 'ouptut.png''
-
     """
     _, _, img_files = next(os.walk(img_path))
     
     img_files = sorted(img_files,key=lambda x: int(os.path.splitext(x)[0]))
-    # IMG_WIDTH, IMG_HEIGHT = (Image.open(img_path + '/11.png')).size
-    IMG_WIDTH, IMG_HEIGHT = IMG_SIZE, IMG_SIZE
+    IMG_WIDTH, IMG_HEIGHT = (Image.open(img_path + '/11.png')).size
+    # IMG_WIDTH, IMG_HEIGHT = IMG_SIZE, IMG_SIZE
     
     img = np.zeros((len(img_files), IMG_WIDTH, IMG_HEIGHT), dtype=np.uint8)
     full_img = Image.new('RGB', (1470, 1470))
@@ -57,7 +59,6 @@ def imgstitch(img_path):
 def DatasetLoad(train_dataset, test_dataset, val_dataset):
     """
     
-
     Parameters
     ----------
     train_dataset : STRING
@@ -66,7 +67,6 @@ def DatasetLoad(train_dataset, test_dataset, val_dataset):
         Sampled test images directory
     val_dataset : STRING
         Sampled validation images directory
-
     Returns
     -------
     X_train : NUMPY ARRAY
@@ -81,7 +81,6 @@ def DatasetLoad(train_dataset, test_dataset, val_dataset):
          Validation dataset to be used for feature validation. Outputs a numpy array of size [NUM_OF_SAMPLES, 224, 224, 3]
     Y_val : NUMPY ARRAY
          Validation dataset to be used for label validation. Outputs a numpy array of size [NUM_OF_SAMPLES, 224, 224, 1]
-
     """
     
     ### TRAINING DATASET ###
@@ -152,4 +151,81 @@ def DatasetLoad(train_dataset, test_dataset, val_dataset):
     
     return X_train, Y_train, X_test, Y_test, X_val, Y_val
 
+class DatasetLoader(object):
+    def __init__(self, image_path: List[str], mask_path: List[str], image_size: Tuple[int], channels: Tuple[int] = (3, 1),
+                 seed: int = None):
+        '''
+        Initialize the dataset loader
+
+        Parameters
+        ----------
+        image_path : Path to images
+        mask_path : Path to masks
+        image_size : Tuple of the image size
+        channels : Tuple the image channels. The default is (3, 1) with the first element corresponding to the image and the second
+        corresponding to the mask
+
+        '''
+        
+        self.image_path = image_path
+        self.mask_path = mask_path
+        self.image_size = image_size
+        self.channels = channels
+        
+        if seed is None:
+            self.seed = random.randint(0, 1000)
+        else:
+            self.seed = seed
+            
+    def _parse(self, image_path, mask_path):
+        img = tf.io.read_file(image_path)
+        msk = tf.io.read_file(mask_path)
+        
+        images = tf.image.decode_png(img, channels = self.channels[0])
+        masks = tf.image.decode_png(msk, channels = self.channels[1])
+        
+        return images, masks
     
+    @tf.function
+    def _map(self, image_path, mask_path):
+        image, mask = self._parse(image_path, mask_path)
+        
+        # There's an issue with ValueError: as_list() is not defined on an unknown TensorShape.
+        # Likely caused by py_function not explicitly defining the shapes of the tensors. Tried to use
+        # set_shape but didn't work. Look into issues later.
+        def _load_func(image_f, mask_f):
+            image_f = tf.cast(image_f, tf.float32)
+            mask_f = tf.cast(mask_f, tf.bool)
+            image_f = image_f.set_shape((self.image_size[0], self.image_size[1], self.channels[0]))
+            mask_f = mask_f.set_shape((self.image_size[0], self.image_size[1], self.channels[1]) )
+            return image_f, mask_f
+        return tf.py_function(_load_func, [image, mask], [tf.float32, tf.bool])
+        # return image, mask
+    
+    def data_batch(self, batch_size, shuffle = False):
+        '''
+        Takes the input data and reads, normalizes, shuffles, and batches it
+
+        Parameters
+        ----------
+        batch_size : int
+            Number of image-mask pairs to load
+        shuffle : bool
+            Shuffles the data. The default is False.
+
+        Returns
+        -------
+        A Tensorflow dataset object
+
+        '''
+        
+        dataset = Dataset.from_tensor_slices((self.image_path, self.mask_path))
+        
+        dataset = dataset.map(self._map, num_parallel_calls=AUTOTUNE)
+        
+        if shuffle:
+            dataset = dataset.prefetch(AUTOTUNE). shuffle(random.randint(0, len(self.image_path))).batch(batch_size)
+        else:
+            dataset = dataset.batch(batch_size).prefetch(AUTOTUNE)
+            
+        return dataset

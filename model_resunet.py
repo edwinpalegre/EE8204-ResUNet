@@ -135,7 +135,7 @@ def ResUNet(inputshape):
 # if each layer is outputting the correct dimension as expected. The final line outputs a graphic of 
 # the actual network for a visual reference
     
-# model = ResUNet((512, 512, 3))
+# model = ResUNet((224, 224, 3))
 # model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 # model.summary()
 # tf.keras.utils.plot_model(model, to_file='model.png', show_layer_names=True, show_shapes=True, rankdir='TB')
