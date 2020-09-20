@@ -7,3 +7,6 @@ results/
 previous_models/
 train_gradaccum.py
 checkpoint.py
+train_bu.py
+train_og.py
+model.png
